@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const { uuid } = require("uuidv4");
-const { Repository } = require("./domain/repository");
+const { Repository, Repositories } = require("./model/repository");
 
 const app = express();
 
@@ -46,10 +46,12 @@ function validateInput(input, fields) {
   return validated;
 }
 
-const repositories = [];
+const repositoriesData = [];
+const repositories = new Repositories(repositoriesData);
 
 app.get("/repositories", (request, response) => {
-  return response.json(repositories);
+  console.log(repositories.findAll(), repositories);
+  return response.json(repositories.findAll());
 });
 
 app.post("/repositories", (request, response) => {
@@ -65,8 +67,8 @@ app.post("/repositories", (request, response) => {
   }
 
   const repository = new Repository(validated.data);
-  repositories.push(repository);
-  console.log(repository);
+  repositories.save(repository);
+
   return response.status(201).json(repository);
 });
 
