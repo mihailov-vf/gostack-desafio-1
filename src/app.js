@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-const { uuid } = require("uuidv4");
+const { isUuid } = require("uuidv4");
 const { Repository, Repositories } = require("./model/repository");
 
 const app = express();
@@ -73,7 +73,30 @@ app.post("/repositories", (request, response) => {
 });
 
 app.put("/repositories/:id", (request, response) => {
-  // TODO
+  const id = request.params.id;
+
+  if (isUuid(id)) {
+    return response.status(400).json({ error: "The 'id' param must be valid" });
+  }
+
+  const validated = validateInput(request.body, [
+    { name: "title", required: true },
+    { name: "url", required: true },
+    { name: "techs", required: true, type: "array" },
+  ]);
+
+  if (validated.error) {
+    return response.status(400).json(validated);
+  }
+
+  const repository = repositories.get(id);
+  if (!repository) {
+    return response
+      .status(400)
+      .json({ error: "The repository must exists to be updated" });
+  }
+
+  return response.json(repository);
 });
 
 app.delete("/repositories/:id", (request, response) => {

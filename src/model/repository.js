@@ -38,7 +38,7 @@ Repositories.prototype.findAll = function () {
 };
 
 Repositories.prototype.get = function (id) {
-  return this.data.get(id) || null;
+  return this.data.get(id);
 };
 
 Repositories.prototype.save = function (item) {
