@@ -37,6 +37,10 @@ Repositories.prototype.findAll = function () {
   return Array.from(this.data.values());
 };
 
+Repositories.prototype.has = function (id) {
+  return this.data.has(id);
+};
+
 Repositories.prototype.get = function (id) {
   return this.data.get(id);
 };
@@ -44,6 +48,11 @@ Repositories.prototype.get = function (id) {
 Repositories.prototype.save = function (item) {
   if (!item.id) {
     throw new Error(`Cannot save a unidentified ${this.entity}`);
+  }
+
+  const oldItem = this.get(item.id);
+  if (oldItem) {
+    item = { ...oldItem, ...item };
   }
 
   this.data.set(item.id, item);

@@ -50,7 +50,6 @@ const repositoriesData = [];
 const repositories = new Repositories(repositoriesData);
 
 app.get("/repositories", (request, response) => {
-  console.log(repositories.findAll(), repositories);
   return response.json(repositories.findAll());
 });
 
@@ -75,7 +74,7 @@ app.post("/repositories", (request, response) => {
 app.put("/repositories/:id", (request, response) => {
   const id = request.params.id;
 
-  if (isUuid(id)) {
+  if (!isUuid(id)) {
     return response.status(400).json({ error: "The 'id' param must be valid" });
   }
 
@@ -89,14 +88,14 @@ app.put("/repositories/:id", (request, response) => {
     return response.status(400).json(validated);
   }
 
-  const repository = repositories.get(id);
-  if (!repository) {
+  if (!repositories.has(id)) {
     return response
       .status(400)
       .json({ error: "The repository must exists to be updated" });
   }
 
-  return response.json(repository);
+  const updatedRepository = repositories.save({ id, ...validated.data });
+  return response.json(updatedRepository);
 });
 
 app.delete("/repositories/:id", (request, response) => {
