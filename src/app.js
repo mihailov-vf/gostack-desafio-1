@@ -78,10 +78,6 @@ app.post("/repositories", (request, response) => {
 app.put("/repositories/:id", (request, response) => {
   const id = request.params.id;
 
-  if (!isUuid(id)) {
-    return response.status(400).json({ error: "The 'id' param must be valid" });
-  }
-
   if (!repositories.has(id)) {
     return response
       .status(400)
@@ -125,7 +121,17 @@ app.delete("/repositories/:id", (request, response) => {
 });
 
 app.post("/repositories/:id/like", (request, response) => {
-  // TODO
+  const id = request.params.id;
+
+  try {
+    const strict = true;
+    const repository = repositories.get(id, strict);
+    repository.like();
+
+    return response.json(repositories.save(repository));
+  } catch (error) {
+    return response.status(400).json({ error });
+  }
 });
 
 module.exports = app;

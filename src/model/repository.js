@@ -56,7 +56,7 @@ Repositories.prototype.get = function (id, strict) {
 Repositories.prototype.save = function (item, strict) {
   const oldItem = this.get(item.id, strict);
   if (oldItem) {
-    item = { ...oldItem, ...item };
+    item = Object.assign(oldItem, item);
   }
 
   this.data.set(item.id, item);
