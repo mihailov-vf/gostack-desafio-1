@@ -65,10 +65,14 @@ app.post("/repositories", (request, response) => {
     return response.status(400).json(validated);
   }
 
-  const repository = new Repository(validated.data);
-  repositories.save(repository);
+  try {
+    const repository = new Repository(validated.data);
+    repositories.save(repository);
 
-  return response.status(201).json(repository);
+    return response.status(201).json(repository);
+  } catch (error) {
+    return response.status(400).json({ error });
+  }
 });
 
 app.put("/repositories/:id", (request, response) => {
@@ -76,6 +80,12 @@ app.put("/repositories/:id", (request, response) => {
 
   if (!isUuid(id)) {
     return response.status(400).json({ error: "The 'id' param must be valid" });
+  }
+
+  if (!repositories.has(id)) {
+    return response
+      .status(400)
+      .json({ error: "The repository must exists to be updated" });
   }
 
   const validated = validateInput(request.body, [
@@ -88,18 +98,30 @@ app.put("/repositories/:id", (request, response) => {
     return response.status(400).json(validated);
   }
 
-  if (!repositories.has(id)) {
-    return response
-      .status(400)
-      .json({ error: "The repository must exists to be updated" });
-  }
+  try {
+    const updatedRepository = repositories.save({ id, ...validated.data });
 
-  const updatedRepository = repositories.save({ id, ...validated.data });
-  return response.json(updatedRepository);
+    return response.json(updatedRepository);
+  } catch (error) {
+    return response.status(400).json({ error });
+  }
 });
 
 app.delete("/repositories/:id", (request, response) => {
-  // TODO
+  const id = request.params.id;
+
+  if (!isUuid(id)) {
+    return response.status(400).json({ error: "The 'id' param must be valid" });
+  }
+
+  try {
+    const strict = true;
+    repositories.delete(id, strict);
+
+    return response.status(204).send();
+  } catch (error) {
+    return response.status(400).json({ error });
+  }
 });
 
 app.post("/repositories/:id/like", (request, response) => {

@@ -1,4 +1,4 @@
-const { uuid } = require("uuidv4");
+const { uuid, isUuid } = require("uuidv4");
 
 /**
  * Repository
@@ -37,20 +37,24 @@ Repositories.prototype.findAll = function () {
   return Array.from(this.data.values());
 };
 
-Repositories.prototype.has = function (id) {
+Repositories.prototype.has = function (id, strict) {
+  if (strict && !isUuid(id)) {
+    throw new Error(`Cannot find ${this.entity} with id ${id}`);
+  }
+
   return this.data.has(id);
 };
 
-Repositories.prototype.get = function (id) {
+Repositories.prototype.get = function (id, strict) {
+  if (strict) {
+    this.has(id, strict);
+  }
+
   return this.data.get(id);
 };
 
-Repositories.prototype.save = function (item) {
-  if (!item.id) {
-    throw new Error(`Cannot save a unidentified ${this.entity}`);
-  }
-
-  const oldItem = this.get(item.id);
+Repositories.prototype.save = function (item, strict) {
+  const oldItem = this.get(item.id, strict);
   if (oldItem) {
     item = { ...oldItem, ...item };
   }
@@ -58,6 +62,12 @@ Repositories.prototype.save = function (item) {
   this.data.set(item.id, item);
 
   return item;
+};
+
+Repositories.prototype.delete = function (id, strict) {
+  if (this.has(id, strict)) {
+    this.data.delete(id);
+  }
 };
 
 exports.Repository = Repository;
